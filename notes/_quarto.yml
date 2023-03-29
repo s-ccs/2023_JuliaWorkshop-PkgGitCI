@@ -1,5 +1,4 @@
 project:
+  type: website
   title: "JuliaRES"
-
-
-
+  output-dir: docs
