@@ -1,0 +1,58 @@
+[
+  {
+    "objectID": "JuliaRES.html",
+    "href": "JuliaRES.html",
+    "title": "Workshop Notes",
+    "section": "",
+    "text": "A package contains functions other people might reuse.\n\n\nMinimal structure (things in brackets optional, but really should not be optional)\n\n./src/MandelbrotFractal.jl\n\n(module MandelbrotFractal)\n\n./Project.toml\n\nname = \"MandelbrotFractal\"\nuuid =\"b4cd1eb8-1e24-11e8-3319-93036a3eb9f3\"\n([compat] entries)\n(version= \"0.1.0\")\n\n\n\n\n\nusing MandelbrotFractal\n\n\n\n\n\n\nImportant\n\n\n\nYou can access functions like this: MandelbrotFractal.mandelbrotFunction(...) - if you want mandelbrotFunction(…) to just work - you have to include export mandelbrotFunction into your module\n\n\n\n\n\n\n\n\nTip\n\n\n\nYou will likely never generate a project manually. There is PkgTemplates and even ]generate for that"
+  },
+  {
+    "objectID": "JuliaRES.html#project",
+    "href": "JuliaRES.html#project",
+    "title": "Workshop Notes",
+    "section": "Project",
+    "text": "Project\nA project is like a “one-off” thing. You are unlikely to re-use the code and want to e.g. analyse a dataset, or run a simulation.\n\nRequirements\nNo specific requirements. You should activate an environment though. I recommend the following minimal structure:\n\n./src/ - all functions should go there\n./scripts/ - all actual scripts should go here,\n./README.md - Write what this is about, who you are etc.\n\n\n\n\n\n\n\nTip\n\n\n\nI highly recommend to use DrWatson.initialize_project([path]) to start a new project."
+  },
+  {
+    "objectID": "JuliaRES.html#environments",
+    "href": "JuliaRES.html#environments",
+    "title": "Workshop Notes",
+    "section": "Environments",
+    "text": "Environments\nThe “base” environment is active by default:\n(@v1.8) pkg>\nKeep this as empty+tidy as possible!\n(you could also start julia by julia --project=\".\" though)\n\nTypical commands\n\nactivate\nactivate . or activate ./path/to creates a new Project.toml in the selected folder (. means current folder), or activates it, if it already exists.\n\n\nstatus\nShows the currently installed packages\n\n\nadd\nMultiple ways to add packages to the Project.toml:\n\nadd UnicodePlots\nadd https://github.com/JuliaPlots/UnicodePlots.jl\nspecify branch: add UnicodePlots#unicodeplots-docs\nspecify version add UnicodePlots@3.3\nadd ./path/to/localPackage\n\n\n\n\n\n\n\nNote\n\n\n\nFolders have to be git-repositories, see below. Probably better use develop\n\n\n\n\nremove\nremove package from Project.toml (not from ~/.julia)\n\n\ndevelop\n\ndev --local UnicodePlots\ndev ./Path/To/LocalPackage/\n\n\n\n\n\n\n\nNote\n\n\n\nYou need to select the branch yourself!\n\n\n\n\n\n\n\n\nNote\n\n\n\nYou are asking for the difference of dev ./Path/Package and add ./Path/Package? Good question! dev will always track the actual content of the folder - whereas add will make a “snapshot” of the last commit in that folder (has to be an git for add!). And you have to use ]up to actually update to new changes\n\n\n\n\npin / free\nYou can pin versions of packages, so that they are not updated. Unpin with free - also undo develop by using free\n\n\ninstantiate / resolve\ninstantiate setup all dependencies in the given Manifest.toml\nresolve update the Manifest.toml to respect the local setup\n\n\n\nGeneral points\nEach project should have their own environment.\n\nYou can (and sometimes should) have multiple environments in one package This can be a bit annoying in PackageDevelopment as you have to switch between enviroments though\nkeep base environemnt (which you can activate by not specifying a name ]activate) clean and super empty"
+  },
+  {
+    "objectID": "JuliaRES.html#tests",
+    "href": "JuliaRES.html#tests",
+    "title": "Workshop Notes",
+    "section": "Tests",
+    "text": "Tests\nyou can run tests for your package via\n(MandelbrotFractal) pkg>]test\nThis will run ./test/runtests.jl - a file that should contain:\n    using MandelbrotFractal\n    using Test\nBest is to define testsets with the tests included for example:\n\n@testset \"sanity checks\" begin\n    @test mandelbrot(complex(-1,1)) isa Complex\n    @test_throws MethodError mandelbrot([1 2; 3 4])\n    @test mandelbrot(0) == 0\n\n    @test abs(mandelbrot(complex(-1,0)) )<=2\n    @test abs(mandelbrot(complex(-1,1)) )>2\nend"
+  },
+  {
+    "objectID": "JuliaRES.html#packages-with-pkgtemplates.jl",
+    "href": "JuliaRES.html#packages-with-pkgtemplates.jl",
+    "title": "Workshop Notes",
+    "section": "Packages with PkgTemplates.jl",
+    "text": "Packages with PkgTemplates.jl\nYou will generally not generate a project manually, but rather use PkgTemplates.jl.\n]activate --temp\n]add PkgTemplates\nusing PkgTemplates\ntpl = Template(user=\"yourGithubUser\",\n            dir=\"./PkgTemplate\", # the new package will appear in this folder\n            plugins=[GitHubActions(;extra_versions=[\"nightly\"]),Documenter{GitHubActions}()])\ntpl(\"MandelbrotFractal\") # created in ./PkgTemplate/MandelbrotFractal/Project.toml\nThis will create the Project+Git, but also setup github-actions / ContinuousIntegration with tests and docs.\nYou still need to go to github.com (or use gh repo create) and create an not-initialized / empty repository with the same name (but .jl added), and run\ngit remote add origin https://github.com/behinger/MandelbrotFractal.jl\ngit push -u origin main\nFinally, to activate documentation being deployed, you need to go to your Github-Repo, go to Settings, Pages and select the gh_page branch to be deployed."
+  },
+  {
+    "objectID": "JuliaRES.html#projects-with-drwatson.jl",
+    "href": "JuliaRES.html#projects-with-drwatson.jl",
+    "title": "Workshop Notes",
+    "section": "Projects with DrWatson.jl",
+    "text": "Projects with DrWatson.jl\nDrWatson.jl is a package that helps manage scientific projects.\nusing DrWatson\nDrWatson.initialize_project(\"./path/where/it/should/be/created/projectName\",authors=\"Benedikt Ehinger\")\nonce you did that, you get a nice folderstrcutre with src, scripts etc. (click the following tipp to expand the full datastructure)\n\n\n\n\n\n\nTip\n\n\n\n\n\n│projectdir          <- Project's main folder. It is initialized as a Git\n│                       repository with a reasonable .gitignore file.\n│\n├── _research        <- WIP scripts, code, notes, comments,\n│   |                   to-dos and anything in an alpha state.\n│   └── tmp          <- Temporary data folder.\n│\n├── data             <- **Immutable and add-only!**\n│   ├── sims         <- Data resulting directly from simulations.\n│   ├── exp_pro      <- Data from processing experiments.\n│   └── exp_raw      <- Raw experimental data.\n│\n├── plots            <- Self-explanatory.\n├── notebooks        <- Jupyter, Weave or any other mixed media notebooks.\n│\n├── papers           <- Scientific papers resulting from the project.\n│\n├── scripts          <- Various scripts, e.g. simulations, plotting, analysis,\n│   │                   The scripts use the `src` folder for their base code.\n│   └── intro.jl     <- Simple file that uses DrWatson and uses its greeting.\n│\n├── src              <- Source code for use in this project. Contains functions,\n│                       structures and modules that are used throughout\n│                       the project and in multiple scripts.\n│\n├── README.md        <- Optional top-level README for anyone using this project.\n├── .gitignore       <- by default ignores _research, data, plots, videos,\n│                       notebooks and latex-compilation related files.\n│\n├── Manifest.toml    <- Contains full list of exact package versions used currently.\n└── Project.toml     <- Main project file, allows activation and installation.\n                        Includes DrWatson by default.\n\n\n\nDrWatson gives you more than a nice folder-structure. It allows you to do this as well:\nusing DrWatson\n@quickactivate projectName\nThis moves the REPL to the project & activate that environment. Neat!\nThere are many other functionalities in DrWatson.jl like srcdir will always link to your src folder - thus you will never have to do a\nsave(\"../plots/test.png\")\nhoping that everyone starts the script in the right directory, but you can simply do\nsave(plotdir(\"test.png\"))\n\n\n\n\n\n\nTip\n\n\n\nThere exists also DrWatsonSim.jl in case you need to run simulations"
+  },
+  {
+    "objectID": "JuliaRES.html#register-your-package",
+    "href": "JuliaRES.html#register-your-package",
+    "title": "Workshop Notes",
+    "section": "Register your Package",
+    "text": "Register your Package"
+  },
+  {
+    "objectID": "JuliaRES.html#documentation",
+    "href": "JuliaRES.html#documentation",
+    "title": "Workshop Notes",
+    "section": "Documentation",
+    "text": "Documentation"
+  }
+]
