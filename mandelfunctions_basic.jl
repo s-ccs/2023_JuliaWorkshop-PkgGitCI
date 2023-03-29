@@ -19,7 +19,7 @@ function mandelbrot(a)
 
   for ix = 1:length(x)
     for iy = 1:length(y)
-      c = complex(x[ix],y[ix])
+      c = complex(x[ix],y[iy])
       A[ix,iy] = abs(mandelbrot(c))
     end
   end
