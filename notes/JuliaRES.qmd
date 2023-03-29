@@ -1,0 +1,257 @@
+---
+title: "Workshop Notes"
+format: 
+    html:
+        toc: true
+execute:
+    echo: true
+    eval: false
+---
+
+## Package
+
+A package contains functions other people might reuse.
+
+##### Requirements
+
+Minimal structure (things in brackets optional, but really should not be optional)
+
+-   `./src/MandelbrotFractal.jl`
+    -   (`module MandelbrotFractal`)
+-   `./Project.toml`
+    -   `name = "MandelbrotFractal"`
+    -   `uuid ="b4cd1eb8-1e24-11e8-3319-93036a3eb9f3"`
+    -   (`[compat]` entries)
+    -   (`version= "0.1.0"`)
+
+##### Usage
+
+``` julia
+using MandelbrotFractal
+```
+
+::: callout-important
+You can access functions like this: `MandelbrotFractal.mandelbrotFunction(...)` - if you want `mandelbrotFunction(…)` to just work - you have to include `export mandelbrotFunction` into your `module`
+:::
+
+::: callout-tip
+You will likely never generate a project manually. There is `PkgTemplates` and even `]generate` for that
+:::
+
+## Project
+
+A project is like a "one-off" thing. You are unlikely to re-use the code and want to e.g. analyse a dataset, or run a simulation.
+
+##### Requirements
+
+No specific requirements. You should activate an environment though. I recommend the following minimal structure:
+
+-   `./src/` - all functions should go there
+-   `./scripts/` - all actual scripts should go here,
+-   `./README.md` - Write what this is about, who you are etc.
+
+::: callout-tip
+I highly recommend to use `DrWatson.initialize_project([path])` to start a new project.
+:::
+
+## Environments
+
+The "base" environment is active by default:
+
+``` julia
+(@v1.8) pkg>
+```
+
+Keep this as empty+tidy as possible!
+
+(you could also start julia by `julia --project="."` though)
+
+### Typical commands
+
+##### `activate`
+
+`activate .` or `activate ./path/to` creates a new `Project.toml` in the selected folder (`.` means current folder), or activates it, if it already exists.
+
+##### `status`
+
+Shows the currently installed packages
+
+##### `add`
+
+Multiple ways to add packages to the `Project.toml`:
+
+-   `add UnicodePlots`
+-   `add https://github.com/JuliaPlots/UnicodePlots.jl`
+-   specify branch: `add UnicodePlots#unicodeplots-docs`
+-   specify version `add UnicodePlots@3.3`
+-   `add ./path/to/localPackage`
+
+::: callout-note
+Folders have to be git-repositories, see below. Probably better use `develop`
+:::
+
+##### `remove`
+
+remove package from `Project.toml` (not from `~/.julia`)
+
+##### `develop`
+
+-   `dev --local UnicodePlots`
+-   `dev ./Path/To/LocalPackage/`
+
+::: callout-note
+You need to select the branch yourself!
+:::
+
+::: callout-note
+You are asking for the difference of `dev ./Path/Package` and `add ./Path/Package`? Good question! `dev` will always track the actual content of the folder - whereas `add` will make a "snapshot" of the last commit in that folder (has to be an git for `add`!). And you have to use `]up` to actually update to new changes
+:::
+
+##### `pin` / `free`
+
+You can pin versions of packages, so that they are not updated. Unpin with `free` - also undo `develop` by using `free`
+
+##### `instantiate` / `resolve`
+
+`instantiate` setup all dependencies in the given `Manifest.toml`
+
+`resolve` update the `Manifest.toml` to respect the local setup
+
+### General points
+
+Each project should have their own environment.
+
+-   You can (and sometimes should) have multiple environments in one package This can be a bit annoying in PackageDevelopment as you have to switch between enviroments though
+
+-   keep base environemnt (which you can activate by not specifying a name `]activate`) clean and super empty
+
+## Tests
+
+you can run tests for your package via
+
+``` julia
+(MandelbrotFractal) pkg>]test
+```
+
+This will run `./test/runtests.jl` - a file that should contain:
+
+``` julia
+    using MandelbrotFractal
+    using Test
+```
+
+Best is to define `testsets` with the tests included for example:
+
+``` julia
+
+@testset "sanity checks" begin
+    @test mandelbrot(complex(-1,1)) isa Complex
+    @test_throws MethodError mandelbrot([1 2; 3 4])
+    @test mandelbrot(0) == 0
+
+    @test abs(mandelbrot(complex(-1,0)) )<=2
+    @test abs(mandelbrot(complex(-1,1)) )>2
+end
+```
+
+## Packages with PkgTemplates.jl
+
+You will generally not generate a project manually, but rather use `PkgTemplates.jl`.
+
+``` julia
+]activate --temp
+]add PkgTemplates
+using PkgTemplates
+tpl = Template(user="yourGithubUser",
+            dir="./PkgTemplate", # the new package will appear in this folder
+            plugins=[GitHubActions(;extra_versions=["nightly"]),Documenter{GitHubActions}()])
+tpl("MandelbrotFractal") # created in ./PkgTemplate/MandelbrotFractal/Project.toml
+```
+
+This will create the Project+Git, but also setup github-actions / ContinuousIntegration with tests and docs.
+
+You still need to go to github.com (or use `gh repo create`) and create an **not-initialized** / empty repository with the same name (but `.jl` added), and run
+
+``` bash
+git remote add origin https://github.com/behinger/MandelbrotFractal.jl
+git push -u origin main
+```
+
+Finally, to activate documentation being deployed, you need to go to your Github-Repo, go to `Settings`, `Pages` and select the `gh_page` branch to be deployed.
+
+## Projects with DrWatson.jl
+
+[DrWatson.jl](https://github.com/JuliaDynamics/DrWatson.jl) is a package that helps manage scientific projects.
+
+``` julia
+using DrWatson
+DrWatson.initialize_project("./path/where/it/should/be/created/projectName",authors="Benedikt Ehinger")
+```
+
+once you did that, you get a nice folderstrcutre with `src`, `scripts` etc.
+(click the following tipp to expand the full datastructure)
+
+:::{.callout-tip collapse="true"}
+```
+│projectdir          <- Project's main folder. It is initialized as a Git
+│                       repository with a reasonable .gitignore file.
+│
+├── _research        <- WIP scripts, code, notes, comments,
+│   |                   to-dos and anything in an alpha state.
+│   └── tmp          <- Temporary data folder.
+│
+├── data             <- **Immutable and add-only!**
+│   ├── sims         <- Data resulting directly from simulations.
+│   ├── exp_pro      <- Data from processing experiments.
+│   └── exp_raw      <- Raw experimental data.
+│
+├── plots            <- Self-explanatory.
+├── notebooks        <- Jupyter, Weave or any other mixed media notebooks.
+│
+├── papers           <- Scientific papers resulting from the project.
+│
+├── scripts          <- Various scripts, e.g. simulations, plotting, analysis,
+│   │                   The scripts use the `src` folder for their base code.
+│   └── intro.jl     <- Simple file that uses DrWatson and uses its greeting.
+│
+├── src              <- Source code for use in this project. Contains functions,
+│                       structures and modules that are used throughout
+│                       the project and in multiple scripts.
+│
+├── README.md        <- Optional top-level README for anyone using this project.
+├── .gitignore       <- by default ignores _research, data, plots, videos,
+│                       notebooks and latex-compilation related files.
+│
+├── Manifest.toml    <- Contains full list of exact package versions used currently.
+└── Project.toml     <- Main project file, allows activation and installation.
+                        Includes DrWatson by default.
+```
+:::
+
+DrWatson gives you more than a nice folder-structure. It allows you to do this as well:
+```julia
+using DrWatson
+@quickactivate projectName
+```
+This moves the REPL to the project & activate that environment. Neat!
+
+There are many other functionalities in DrWatson.jl like  `srcdir` will always link to your `src` folder - thus you will never have to do a 
+```julia 
+save("../plots/test.png")
+```
+
+ hoping that everyone starts the script in the right directory, but you can simply do 
+
+ ```julia
+ save(plotdir("test.png"))
+ ```
+
+::: callout-tip
+There exists also [DrWatsonSim.jl](https://github.com/sebastianpech/DrWatsonSim.jl/) in case you need to run simulations
+:::
+
+
+## Register your Package
+
+
+## Documentation
