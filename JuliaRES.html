@@ -173,7 +173,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <section id="package" class="level2">
 <h2 class="anchored" data-anchor-id="package">Package</h2>
-<p>A package contains functions other people might reuse.</p>
+<p>A package contains functions other people might reuse. One example created during this workshop can be <a href="https://github.com/behinger/MandelbrotFractal.jl/">found here</a></p>
 <section id="requirements" class="level5">
 <h5 class="anchored" data-anchor-id="requirements">Requirements</h5>
 <p>Minimal structure (things in brackets optional, but really should not be optional)</p>
@@ -455,11 +455,87 @@ Tip
 </section>
 <section id="register-your-package" class="level2">
 <h2 class="anchored" data-anchor-id="register-your-package">Register your Package</h2>
+<p>There exists a <a href="https://github.com/JuliaRegistries/General">central registry</a> for Julia packages. There are some rules to send your package there - so check them out.</p>
+<p>For instance, there are some rules regarding to naming, all dependencies need compat entries and other rules. There is also waiting period of 3 days for new packages.</p>
+<p>To register a package, bump the version number and comment to the commit (or in an issue): <code>@juliaregistrator register</code>. This will generate a pull request to the repository. Make sure your docs/unittests work!</p>
+<p>You could also host your own <code>LocalRegistry.jl</code> on Github - if you don’t want to be under the yoch of the central registry ;)</p>
 </section>
 <section id="documentation" class="level2">
 <h2 class="anchored" data-anchor-id="documentation">Documentation</h2>
+<p>Documentation is super important!</p>
+<section id="readme.md" class="level4">
+<h4 class="anchored" data-anchor-id="readme.md">Readme.md</h4>
+<p>The readme should show a “quickstart”, show a short description of the tool, should show that you use unittests and have docs and should have a citation (e.g.&nbsp;via zenodo)</p>
+</section>
+<section id="docstrings" class="level4">
+<h4 class="anchored" data-anchor-id="docstrings">DocStrings</h4>
+<div class="sourceCode" id="cb13"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st"> docstring(fun::Function)</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="st"> Autmatically infer what the function does and add such </span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="st"> a  docstring text to it. Input can be any arbitrary complex </span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="st"> function `fun`. Stopping rules do not apply</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="st"> fun [::Function] (Default: nothing) - specify the function </span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="st">                                     you want to run</span></span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="st">"""</span></span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a><span class="kw">function</span> <span class="fu">docstring</span>(fun<span class="op">::</span><span class="dt">Function</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    [<span class="op">...</span>]</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>There are several guides how to write docstrins, especially in the julia docs [WHERE?]</p>
+</section>
+<section id="documenter.jl" class="level4">
+<h4 class="anchored" data-anchor-id="documenter.jl">Documenter.jl</h4>
+<p>Documenter allows you to 1) pull out all the dosctrings from your functions + sort/arrange them and 2) add your own tutorials/howtos/explanations/references.</p>
+<section id="tutorials" class="level6">
+<h6 class="anchored" data-anchor-id="tutorials">tutorials</h6>
+<p>Tutorials are typically from start to end including all steps how to do a certain thing. E.g. from generating the x/y to plotting the mandelbrot</p>
+</section>
+<section id="howtos" class="level6">
+<h6 class="anchored" data-anchor-id="howtos">howtos</h6>
+<p>How can I use the MandelbrotFractal function to apply it fast? To colors? to …? This relates more to “one-off” explanations, explaining a single thing</p>
+</section>
+<section id="explanations" class="level6">
+<h6 class="anchored" data-anchor-id="explanations">explanations</h6>
+<p>here you can add documentation that explains how certain things work. e.g.&nbsp;you could have a notebook depicting the different steps how one value decides to join the mandelbrot set or not</p>
+</section>
+<section id="reference" class="level6">
+<h6 class="anchored" data-anchor-id="reference">reference</h6>
+<p>Under this category falls everything that explains how it was done, e.g.&nbsp;what algorithms exist for Mandelbrot and are used, maybe benchmarks?</p>
+</section>
+</section>
+<section id="literate.jl" class="level4">
+<h4 class="anchored" data-anchor-id="literate.jl">Literate.jl</h4>
+<p>The trouble with Documenter.jl lies in their <code>.md</code> format that requires the follow code blocks:</p>
+<pre><code> ` ``@example main
+using Bla
+
+doing("blub")
+ ` ``</code></pre>
+<p>They are quite verbose and not easy to run. Literate.jl offers an alternative, where you first write your tutorial etc. in a <code>.jl</code> file, which Literate.jl translates to a <code>.md</code> for Documenter.jl</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>    <span class="im">using</span> <span class="bu">Glob</span>,<span class="bu">Literate</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    GENERATED <span class="op">=</span> <span class="fu">joinpath</span>(<span class="pp">@__DIR__</span>, <span class="st">"src"</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> subfolder <span class="op">∈</span> [<span class="st">"explanations"</span>,<span class="st">"howto"</span>,<span class="st">"tutorials"</span>,<span class="st">"reference"</span>]</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        SOURCE_FILES <span class="op">=</span> Glob.<span class="fu">glob</span>(subfolder<span class="op">*</span><span class="st">"/*.jl"</span>, GENERATED)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">foreach</span>(fn <span class="op">-&gt;</span> Literate.<span class="fu">markdown</span>(fn, GENERATED<span class="op">*</span><span class="st">"/"</span><span class="op">*</span>subfolder), SOURCE_FILES)</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">end</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>This translates something like:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode julia code-with-copy"><code class="sourceCode julia"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # Heading 1</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="co"># a markdown text **bold** etc.</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="im">using</span> <span class="bu">Bla</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a><span class="co">## code comment</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="fu">doing</span>(<span class="st">"blub"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>to a Documenter.jl <code>.md</code></p>
+<pre><code># Heading 1
+a markdown text **bold** etc.
+` ``@example main
+using Bla
+# code comment
+doing("blub")
+`` `</code></pre>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

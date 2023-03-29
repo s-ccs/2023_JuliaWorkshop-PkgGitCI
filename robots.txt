@@ -1,1 +1,1 @@
-Sitemap: https://github.com/s-ccs/2023_JuliaWorkshop-PkgGitCI/sitemap.xml
+Sitemap: https://s-ccs.github.io/2023_JuliaWorkshop-PkgGitCI/sitemap.xml
